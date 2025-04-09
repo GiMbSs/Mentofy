@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load static %}
+{% block 'body' %}
+
+<header class="bg-slate-900 shadow-sm">
+  <nav class="flex items-center justify-between p-4 lg:px-8" aria-label="Global">
+    <div class="flex lg:flex-1">
+      <a href="{% url 'home' %}" class="-m-1.5 p-1.5 flex items-center">
+        <img class="h-8 w-auto mr-2" src="{% static 'logo.png' %}" alt="">
+        <span class="text-white font-bold">Mentoria</span>
+      </a>
+    </div>
+    <div class="hidden lg:flex lg:gap-x-12">
+      <a href="{% url 'mentorados'%}" class="text-sm/6 font-semibold text-gray-100 hover:text-blue-300 transition-colors">Mentorados</a>
+      <a href="{% url 'reunioes'%}" class="text-sm/6 font-semibold text-gray-100 hover:text-blue-300 transition-colors">Reuniões</a>
+      <a href="{% url 'navigators'%}" class="text-sm/6 font-semibold text-blue-300 border-b-2 border-blue-300">Navigators</a>
+    </div>
+    {% if request.user.is_authenticated %}
+    <div class="hidden lg:flex lg:flex-1 lg:justify-end">
+      <div class="flex items-center">
+        <span class="text-sm text-gray-300 mr-2">{{ request.user.username }}</span>
+        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+          {{ request.user.username|first|upper }}
+        </div> <!-- Fecha a div do avatar aqui -->
+        <a href="{% url 'logout' %}" class="text-sm text-indigo-400 hover:text-indigo-300 flex items-center gap-1 ml-4"> <!-- Adiciona um espaçamento adequado -->
+          <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+          </svg>
+          Sair
+        </a>
+      </div>
+    </div>
+    {% endif %}
+  </nav>
+</header>
+
+
+<div class="bg-gradient-to-b from-[#040e1b] to-[#0a1a33] min-h-screen">
+  <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-center">
+      <div class="w-full max-w-md">
+        <!-- Header Section -->
+        <div class="text-center mb-8">
+          <h2 class="text-3xl font-bold text-white">Cadastrar Navigator</h2>
+          <p class="mt-2 text-gray-400">Adicione um novo colaborador ao sistema</p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+          {% for message in messages %}
+          <div class="rounded-md {% if message.tags == 'error' %}bg-red-900/50{% else %}bg-green-900/50{% endif %} p-3 text-sm text-white">
+            {{ message }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Form Container -->
+        <div class="bg-gray-800/50 rounded-xl shadow-lg border border-gray-700 p-8">
+          <form action="{% url 'cadastro_navigators' %}" method="POST" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Name Field -->
+            <div>
+              <label for="nome" class="block text-sm font-medium text-gray-300 mb-2">Nome completo *</label>
+              <div class="relative">
+                <input type="text" name="nome" id="nome" required
+                       class="block w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 pl-10 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                       placeholder="Nome do navigator">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Email Field -->
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-300 mb-2">E-mail</label>
+              <div class="relative">
+                <input type="email" name="email" id="email"
+                       class="block w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 pl-10 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                       placeholder="exemplo@email.com">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Phone Field -->
+            <div>
+              <label for="telefone" class="block text-sm font-medium text-gray-300 mb-2">Telefone</label>
+              <div class="relative">
+                <input type="tel" name="telefone" id="telefone"
+                       class="block w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 pl-10 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                       placeholder="(00) 00000-0000">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="space-y-3">
+              <button type="submit" 
+                      class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Cadastrar Navigator
+              </button>
+              
+              <a href="{% url 'mentorados' %}" 
+                 class="w-full bg-gray-700 hover:bg-gray-600 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Voltar para Mentorados
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Phone number formatting
+  document.getElementById('telefone').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 2) {
+      value = `(${value.substring(0,2)}) ${value.substring(2)}`;
+    }
+    if (value.length > 10) {
+      value = `${value.substring(0,10)}-${value.substring(10)}`;
+    }
+    e.target.value = value.substring(0, 15);
+  });
+</script>
+
+{% endblock %}

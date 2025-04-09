@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load static %}
+{% block 'body' %}
+
+<header class="bg-slate-900 shadow-sm">
+  <nav class="flex items-center justify-between p-4 lg:px-8" aria-label="Global">
+    <div class="flex lg:flex-1">
+      <a href="{% url 'home' %}" class="-m-1.5 p-1.5 flex items-center">
+        <img class="h-8 w-auto mr-2" src="{% static 'logo.png' %}" alt="">
+        <span class="text-white font-bold">Mentoria</span>
+      </a>
+    </div>
+    <div class="hidden lg:flex lg:gap-x-12">
+      <a href="{% url 'mentorados'%}" class="text-sm/6 font-semibold text-gray-100 hover:text-blue-300 transition-colors">Mentorados</a>
+      <a href="{% url 'reunioes'%}" class="text-sm/6 font-semibold text-blue-300 border-b-2 border-blue-300">Reuniões</a>
+      <a href="{% url 'navigators'%}" class="text-sm/6 font-semibold text-gray-100 hover:text-blue-300 transition-colors">Navigators</a>
+    </div>
+    {% if request.user.is_authenticated %}
+    <div class="hidden lg:flex lg:flex-1 lg:justify-end">
+      <div class="flex items-center">
+        <span class="text-sm text-gray-300 mr-2">{{ request.user.username }}</span>
+        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+          {{ request.user.username|first|upper }}
+        </div> <!-- Fecha a div do avatar aqui -->
+        <a href="{% url 'logout' %}" class="text-sm text-indigo-400 hover:text-indigo-300 flex items-center gap-1 ml-4"> <!-- Adiciona um espaçamento adequado -->
+          <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+          </svg>
+          Sair
+        </a>
+      </div>
+    </div>
+    {% endif %}
+  </nav>
+</header>
+
+
+<div class="bg-gradient-to-b from-[#040e1b] to-[#0a1a33] min-h-screen">
+  <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Header Section -->
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-white">Agendamento de Reuniões</h1>
+        <p class="mt-2 text-gray-400">Gerencie seus horários disponíveis e reuniões agendadas</p>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Open Slots Form -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-700">
+        <h2 class="text-xl font-bold text-white mb-6">Abrir Novo Horário</h2>
+        
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+          {% for message in messages %}
+          <div class="rounded-md {% if message.tags == 'error' %}bg-red-900/50{% else %}bg-green-900/50{% endif %} p-3 text-sm text-white">
+            {{ message }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        
+        <form action="{% url 'reunioes' %}" method="POST" class="space-y-4">
+          {% csrf_token %}
+          
+          <div>
+            <label for="date" class="block text-sm font-medium text-gray-300 mb-2">Data e Hora</label>
+            <div class="relative">
+              <input type="datetime-local" name="data" id="date" required
+                     class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <p class="mt-1 text-xs text-gray-400">Selecione a data e horário para disponibilizar</p>
+          </div>
+          
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+            </svg>
+            Abrir Horário
+          </button>
+        </form>
+      </div>
+
+      <!-- Scheduled Meetings -->
+      <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-700">
+          <h2 class="text-xl font-bold text-white">Reuniões Agendadas</h2>
+          <p class="text-sm text-gray-400 mt-1">{{ reunioes.count }} reunião{{ reunioes.count|pluralize }} marcada{{ reunioes.count|pluralize }}</p>
+        </div>
+        
+        {% if reunioes %}
+        <div class="divide-y divide-gray-700">
+          {% for reuniao in reunioes %}
+          <div class="p-6 hover:bg-gray-750 transition-colors">
+            <div class="flex items-start justify-between">
+              <div class="flex items-start gap-4">
+                {% if reuniao.mentorado.foto %}
+                <img class="size-12 flex-none rounded-full object-cover" src="{{reuniao.mentorado.foto.url}}" alt="{{reuniao.mentorado.nome}}">
+                {% else %}
+                <div class="size-12 flex-none rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+                  {{ reuniao.mentorado.nome|first|upper }}
+                </div>
+                {% endif %}
+                
+                <div>
+                  <h3 class="text-lg font-medium text-white">{{ reuniao.mentorado.nome }}</h3>
+                  {% if reuniao.descricao %}
+                  <p class="text-sm text-gray-400 mt-1">{{ reuniao.descricao }}</p>
+                  {% endif %}
+                  <div class="mt-2 flex items-center gap-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{% if reuniao.tag == 'UR' %}red-900 text-red-100{% elif reuniao.tag == 'IM' %}yellow-900 text-yellow-100{% else %}blue-900 text-blue-100{% endif %}">
+                      {{ reuniao.get_tag_display }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="text-right">
+                <p class="text-sm font-medium text-white">
+                  {{ reuniao.data.data_inicial|date:"d/m/Y" }}
+                </p>
+                <p class="text-sm text-gray-400">
+                  {{ reuniao.data.data_inicial|date:"H:i" }}h
+                </p>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-8 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <h3 class="text-lg font-medium text-gray-300">Nenhuma reunião agendada</h3>
+          <p class="mt-1 text-gray-500">Seus horários disponíveis aparecerão aqui quando agendados</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Set minimum datetime to current time
+  document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    // Format to YYYY-MM-DDTHH:MM (local time)
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+    document.getElementById('date').min = minDateTime;
+    
+    // Set default value to next full hour
+    const nextHour = new Date(now);
+    nextHour.setHours(nextHour.getHours() + 1);
+    nextHour.setMinutes(0, 0, 0);
+    
+    const nextHourFormatted = nextHour.toISOString().slice(0, 16);
+    document.getElementById('date').value = nextHourFormatted;
+  });
+</script>
+
+{% endblock 'body' %}

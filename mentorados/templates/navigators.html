@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'body' %}
+
+<header class="bg-slate-900 shadow-sm">
+    <nav class="flex items-center justify-between p-4 lg:px-8" aria-label="Global">
+      <div class="flex lg:flex-1">
+        <a href="{% url 'home' %}" class="-m-1.5 p-1.5 flex items-center">
+          <img class="h-8 w-auto mr-2" src="{% static 'logo.png' %}" alt="">
+          <span class="text-white font-bold">Mentoria</span>
+        </a>
+      </div>
+      <div class="hidden lg:flex lg:gap-x-12">
+        <a href="{% url 'mentorados'%}" class="text-sm/6 font-semibold text-gray-100 hover:text-blue-300 transition-colors">Mentorados</a>
+        <a href="{% url 'reunioes'%}" class="text-sm/6 font-semibold text-gray-100 hover:text-blue-300 transition-colors">Reuniões</a>
+        <a href="{% url 'navigators'%}" class="text-sm/6 font-semibold text-blue-300 border-b-2 border-blue-300">Navigators</a>
+      </div>
+      {% if request.user.is_authenticated %}
+      <div class="hidden lg:flex lg:flex-1 lg:justify-end">
+        <div class="flex items-center">
+          <span class="text-sm text-gray-300 mr-2">{{ request.user.username }}</span>
+          <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+            {{ request.user.username|first|upper }}
+          </div> <!-- Fecha a div do avatar aqui -->
+          <a href="{% url 'logout' %}" class="text-sm text-indigo-400 hover:text-indigo-300 flex items-center gap-1 ml-4"> <!-- Adiciona um espaçamento adequado -->
+            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+            </svg>
+            Sair
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </nav>
+  </header>
+  
+
+<!-- Main Content -->
+<div class="bg-gradient-to-b from-[#040e1b] to-[#0a1a33] min-h-screen">
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Header with Add Button -->
+        <div class="flex justify-between items-center mb-12">
+            <div>
+                <h1 class="text-3xl font-bold text-white">Navigators</h1>
+                <p class="text-gray-400 mt-2">Gerencie seus navigators e mentorados</p>
+            </div>
+            <a href="{% url 'cadastro_navigators' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                </svg>
+                Adicionar Navigator
+            </a>
+        </div>
+
+        <!-- Navigator Cards Grid -->
+        {% if navigators_data %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for navigator in navigators_data %}
+            <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-700">
+                <!-- Navigator Header -->
+                <div class="bg-gray-700 px-6 py-4 border-b border-gray-600">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-bold text-white">{{ navigator.navigator.nome }}</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+                                {{ navigator.mentorados.count }} mentorado{{ navigator.mentorados.count|pluralize }}
+                            </span>
+                            <a href="{% url 'excluir_navigator' navigator.navigator.id %}" 
+                               onclick="return confirmarExclusaoNavigator(this, '{{ navigator.navigator.nome }}', {{ navigator.mentorados.count }})"
+                               class="text-red-400 hover:text-red-300"
+                               title="Excluir navigator">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigator Details -->
+                <div class="p-6">
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 mt-0.5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                            </svg>
+                            <p class="text-gray-300">{{ navigator.navigator.email|default:"E-mail não informado" }}</p>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 mt-0.5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                            </svg>
+                            <p class="text-gray-300">
+                                {% if navigator.navigator.telefone %}
+                                    {{ navigator.navigator.telefone|slice:":2" }} {{ navigator.navigator.telefone|slice:"2:" }}
+                                {% else %}
+                                    Telefone não informado
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Mentorados Section -->
+                    <div class="mt-6">
+                        <h4 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Mentorados</h4>
+                        {% if navigator.mentorados %}
+                        <ul class="space-y-2">
+                            {% for mentorado in navigator.mentorados %}
+                            <li class="flex items-center bg-gray-700 rounded-lg px-3 py-2 hover:bg-gray-600 transition-colors">
+                                <div class="flex-shrink-0 mr-3">
+                                    {% if mentorado.foto %}
+                                    <img class="h-8 w-8 rounded-full object-cover" src="{{ mentorado.foto.url }}" alt="{{ mentorado.nome }}">
+                                    {% else %}
+                                    <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                                        {{ mentorado.nome|first|upper }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-white">{{ mentorado.nome }}</p>
+                                    <p class="text-xs text-gray-400">{{ mentorado.email }}</p>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <p class="text-gray-400 italic">Nenhum mentorado associado</p>
+                            <a href="{% url 'mentorados' %}" class="text-blue-400 text-sm hover:underline mt-2 inline-block">Adicionar mentorado</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-12 bg-gray-800 rounded-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-white">Nenhum navigator cadastrado</h3>
+            <p class="mt-1 text-gray-400">Comece adicionando seu primeiro navigator</p>
+            <div class="mt-6">
+                <a href="{% url 'cadastro_navigators' %}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Adicionar Navigator
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function confirmarExclusaoNavigator(link, nome, qtdMentorados) {
+    if (qtdMentorados > 0) {
+        alert(`Não é possível excluir o Navigator ${nome} pois ele tem ${qtdMentorados} mentorado${qtdMentorados !== 1 ? 's' : ''} associado${qtdMentorados !== 1 ? 's' : ''}`);
+        return false;
+    }
+    return confirm(`Tem certeza que deseja excluir o Navigator ${nome}?\nEsta ação não pode ser desfeita.`);
+}
+</script>
+
+{% endblock 'body' %}

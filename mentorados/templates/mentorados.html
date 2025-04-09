@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+{% load static %}
+{% block 'body' %}
+
+<header class="bg-slate-900 shadow-sm">
+  <nav class="flex items-center justify-between p-4 lg:px-8" aria-label="Global">
+    <div class="flex lg:flex-1">
+      <a href="{% url 'home' %}" class="-m-1.5 p-1.5 flex items-center">
+        <img class="h-8 w-auto mr-2" src="{% static 'logo.png' %}" alt="">
+        <span class="text-white font-bold">Mentoria</span>
+      </a>
+    </div>
+    <div class="hidden lg:flex lg:gap-x-12">
+      <a href="{% url 'mentorados'%}" class="text-sm/6 font-semibold text-blue-300 border-b-2 border-blue-300">Mentorados</a>
+      <a href="{% url 'reunioes'%}" class="text-sm/6 font-semibold text-gray-100 hover:text-blue-300 transition-colors">Reuniões</a>
+      <a href="{% url 'navigators'%}" class="text-sm/6 font-semibold text-gray-100 hover:text-blue-300 transition-colors">Navigators</a>
+    </div>
+    {% if request.user.is_authenticated %}
+    <div class="hidden lg:flex lg:flex-1 lg:justify-end">
+      <div class="flex items-center">
+        <span class="text-sm text-gray-300 mr-2">{{ request.user.username }}</span>
+        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+          {{ request.user.username|first|upper }}
+        </div> <!-- Fecha a div do avatar aqui -->
+        <a href="{% url 'logout' %}" class="text-sm text-indigo-400 hover:text-indigo-300 flex items-center gap-1 ml-4"> <!-- Adiciona um espaçamento adequado -->
+          <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+          </svg>
+          Sair
+        </a>
+      </div>
+    </div>
+    {% endif %}
+  </nav>
+</header>
+
+
+<div class="bg-gradient-to-b from-[#040e1b] to-[#0a1a33] min-h-screen">
+  <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-white">Gerenciamento de Mentorados</h1>
+        <p class="mt-2 text-gray-400">Cadastre e acompanhe o progresso dos seus mentorados</p>
+      </div>
+      <div class="w-full md:w-auto">
+        <div class="flex items-center gap-4">
+          <div class="bg-gray-800 rounded-lg p-3 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-white">{{ mentorados.count }} mentorado{{ mentorados.count|pluralize }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form and Chart Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      <!-- Registration Form -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-700">
+        <h2 class="text-xl font-bold text-white mb-6">Cadastrar Novo Mentorado</h2>
+        
+        {% if messages %}
+        <div class="mb-6 space-y-2">
+          {% for message in messages %}
+          <div class="rounded-md {% if message.tags == 'error' %}bg-red-900/50{% else %}bg-green-900/50{% endif %} p-3 text-sm text-white">
+            {{ message }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        
+        <form action="{% url 'mentorados' %}" method="POST" enctype='multipart/form-data' class="space-y-4">
+          {% csrf_token %}
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="nome" class="block text-sm font-medium text-gray-300 mb-1">Nome completo</label>
+              <input type="text" name="nome" id="nome" required 
+                     class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-300 mb-1">E-mail</label>
+              <input type="email" name="email" id="email" required 
+                     class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="telefone" class="block text-sm font-medium text-gray-300 mb-1">Telefone</label>
+              <input type="tel" name="telefone" id="telefone" 
+                     class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     placeholder="(00) 00000-0000">
+            </div>
+            
+            <div>
+              <label for="foto" class="block text-sm font-medium text-gray-300 mb-1">Foto (opcional)</label>
+              <input type="file" name="foto" id="foto" 
+                     class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="estagio" class="block text-sm font-medium text-gray-300 mb-1">Estágio</label>
+              <select name="estagio" id="estagio" required 
+                      class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                {% for estagio in estagios %}
+                <option value="{{estagio.0}}">{{estagio.1}}</option>
+                {% endfor %}
+              </select>
+            </div>
+            
+            <div>
+              <label for="navigator" class="block text-sm font-medium text-gray-300 mb-1">Navigator</label>
+              <div class="flex items-end gap-2">
+                <select name="navigator" id="navigator" required 
+                        class="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  {% for navigator in navigators %}
+                  <option value="{{navigator.id}}">{{navigator.nome}}</option>
+                  {% endfor %}
+                </select>
+                <a href="{% url 'cadastro_navigators' %}" class="text-blue-400 hover:text-blue-300 flex items-center gap-1 text-sm whitespace-nowrap">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                  </svg>
+                  Novo
+                </a>
+              </div>
+            </div>
+          </div>
+          
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+            </svg>
+            Cadastrar Mentorado
+          </button>
+        </form>
+      </div>
+      
+      <!-- Statistics Chart -->
+      <div class="bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-700 flex flex-col">
+        <h2 class="text-xl font-bold text-white mb-6">Distribuição por Estágio</h2>
+        <div class="flex-1 flex items-center justify-center">
+          <canvas id="myChart" class="w-full h-full max-h-80"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Mentorados List -->
+    <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-700">
+        <h2 class="text-xl font-bold text-white">Seus Mentorados</h2>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-700">
+          <thead class="bg-gray-700">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Mentorado</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden md:table-cell">Estágio</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden lg:table-cell">Data de Entrada</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden sm:table-cell">Navigator</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Token</th>
+            </tr>
+          </thead>
+          <tbody class="bg-gray-800 divide-y divide-gray-700">
+            {% for mentorado in mentorados %}
+            <tr class="hover:bg-gray-750 transition-colors">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10">
+                    {% if mentorado.foto %}
+                    <img class="h-10 w-10 rounded-full object-cover" src="{{mentorado.foto.url}}" alt="{{mentorado.nome}}">
+                    {% else %}
+                    <div class="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+                      {{ mentorado.nome|first|upper }}
+                    </div>
+                    {% endif %}
+                  </div>
+                  <div class="ml-4">
+                    <a href="{% url 'tarefas' mentorado.id %}" class="text-sm font-medium text-white hover:text-blue-300">{{mentorado.nome}}</a>
+                    <div class="text-sm text-gray-400">{{mentorado.email}}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap hidden md:table-cell">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-900/50 text-blue-300">
+                  {{mentorado.get_estagio_display}}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="flex items-center">
+                  <span class="h-2 w-2 rounded-full bg-green-400 mr-2"></span>
+                  <span class="text-sm text-white">Ativo</span>
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400 hidden lg:table-cell">
+                {{mentorado.criado_em|date:"d/m/Y"}}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400 hidden sm:table-cell">
+                <div class="flex items-center">
+                  <span class="mr-2">{{mentorado.navigator.nome}}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class='flex items-center gap-2'>
+                  <span class="font-mono bg-gray-700 px-2 py-1 rounded">{{mentorado.token}}</span>
+                  <button onclick="copiarToken(this)" 
+                          class='text-blue-400 hover:text-blue-300'
+                          data-token='{{mentorado.token}}'
+                          title='Copiar token'>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                  </button>
+                  <a href='{% url "enviar_token_email" mentorado.id %}' 
+                     onclick="return confirm('Enviar token para o email de {{mentorado.nome}}?')"
+                     class='text-blue-400 hover:text-blue-300' 
+                     title='Enviar token por email'>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                    </svg>
+                  </a>
+                  <a href='{% url "excluir_mentorado" mentorado.id %}' 
+                     onclick="return confirmarExclusao(this, '{{mentorado.nome}}')"
+                     class='text-red-400 hover:text-red-300' 
+                     title='Excluir mentorado'>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="px-6 py-8 text-center text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <p class="text-lg">Nenhum mentorado cadastrado ainda</p>
+                <p class="mt-1">Comece cadastrando seu primeiro mentorado</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function confirmarExclusao(link, nome) {
+  return confirm(`Tem certeza que deseja excluir o mentorado ${nome}?\nEsta ação removerá todos os dados associados (tarefas, vídeos e reuniões) e não pode ser desfeita.`);
+}
+
+function copiarToken(button) {
+  const token = button.dataset.token;
+  navigator.clipboard.writeText(token).then(() => {
+    // Feedback visual temporário
+    const originalHTML = button.innerHTML;
+    button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+    </svg>`;
+    
+    setTimeout(() => {
+      button.innerHTML = originalHTML;
+    }, 2000);
+  }).catch(err => {
+    console.error('Falha ao copiar token:', err);
+    alert('Não foi possível copiar o token');
+  });
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const ctx = document.getElementById('myChart');
+      
+      const estagiosData = JSON.parse('{{estagios_flat|safe|escapejs}}');
+      const qtdData = JSON.parse('{{qtd_estagios|safe|escapejs}}');
+      
+      new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+              labels: estagiosData,
+              datasets: [{
+                  label: 'Quantidade de mentorados',
+                  data: qtdData,
+                  backgroundColor: [
+                      'rgba(79, 70, 229, 0.8)',
+                      'rgba(99, 102, 241, 0.8)',
+                      'rgba(129, 140, 248, 0.8)',
+                      'rgba(165, 180, 252, 0.8)',
+                      'rgba(199, 210, 254, 0.8)'
+                  ],
+                  borderColor: [
+                      'rgba(79, 70, 229, 1)',
+                      'rgba(99, 102, 241, 1)',
+                      'rgba(129, 140, 248, 1)',
+                      'rgba(165, 180, 252, 1)',
+                      'rgba(199, 210, 254, 1)'
+                  ],
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                  legend: {
+                      position: 'right',
+                      labels: {
+                          color: 'white',
+                          font: {
+                              size: 12
+                          }
+                      }
+                  },
+                  tooltip: {
+                      callbacks: {
+                          label: function(context) {
+                              return `${context.label}: ${context.raw} mentorado${context.raw !== 1 ? 's' : ''}`;
+                          }
+                      }
+                  }
+              },
+              cutout: '70%'
+          }
+      });
+
+      // Format phone number input
+      const phoneInput = document.getElementById('telefone');
+      if (phoneInput) {
+          phoneInput.addEventListener('input', function(e) {
+              let value = e.target.value.replace(/\D/g, '');
+              if (value.length > 2) {
+                  value = `(${value.substring(0,2)}) ${value.substring(2)}`;
+              }
+              if (value.length > 10) {
+                  value = `${value.substring(0,10)}-${value.substring(10)}`;
+              }
+              e.target.value = value.substring(0, 15);
+          });
+      }
+  });
+</script>
+
+{% endblock 'body' %}
