@@ -70,7 +70,10 @@ mentorados/
 
 ## 📸 Screenshots
 
-_(Adicione screenshots das principais telas do sistema aqui)_
+![Screen1](screenshots/1.jpg)
+![Screen2](screenshots/2.jpg)
+![Screen3](screenshots/3.jpg)
+![Screen4](screenshots/4.jpg)
 
 ## 📝 Licença
 
