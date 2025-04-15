@@ -77,7 +77,7 @@ mentorados/
 
 ## 📝 Licença
 
-Este projeto não é licenciado, mas pedimos que para uso comercial, favor solicitar autorização em gimbss@gmai.com
+Este projeto não é licenciado, mas pedimos que para uso comercial, favor solicitar autorização em gimbss@gmail.com
 
 ## 👥 Contribuição
 
