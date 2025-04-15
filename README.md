@@ -77,7 +77,7 @@ mentorados/
 
 ## 📝 Licença
 
-Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+Este projeto não é licenciado, mas pedimos que para uso comercial, favor solicitar autorização em gimbss@gmai.com
 
 ## 👥 Contribuição
 
